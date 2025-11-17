@@ -6,7 +6,7 @@ import sesionRoutes from './sesionRoutes.js';
 const router = express.Router();
 
 /**
- * Rutas centralizadas de la API
+ * Rutas centralizadas de la APIs
  */
 
 // Ruta de health check

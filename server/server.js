@@ -45,10 +45,64 @@ app.use(helmet({
 }));
 
 // CORS - Configuración de origen cruzado
+// Permitir múltiples orígenes para desarrollo y producción
+const allowedOrigins = [];
+
+// Agregar URL del cliente desde variable de entorno (producción)
+if (process.env.CLIENT_URL) {
+  allowedOrigins.push(process.env.CLIENT_URL);
+  console.log(colors.cyan(`✓ CORS: URL de producción agregada: ${process.env.CLIENT_URL}`));
+}
+
+// Agregar URLs de desarrollo comunes (siempre permitidas, incluso en producción)
+// Esto permite que el frontend local se conecte al backend desplegado
+allowedOrigins.push(
+  'http://localhost:3000',
+  'http://localhost:5173', // Vite default port
+  'http://localhost:5174',
+  'http://localhost:3001',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174'
+);
+
+// Si hay URLs adicionales en producción, agregarlas desde variable de entorno
+if (process.env.CLIENT_URLS) {
+  const additionalUrls = process.env.CLIENT_URLS.split(',').map(url => url.trim());
+  allowedOrigins.push(...additionalUrls);
+  console.log(colors.cyan(`✓ CORS: URLs adicionales agregadas: ${additionalUrls.join(', ')}`));
+}
+
+// Log de orígenes permitidos al iniciar
+console.log(colors.cyan(`✓ CORS: Orígenes permitidos: ${allowedOrigins.join(', ')}`));
+
 const corsOptions = {
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: function (origin, callback) {
+    // Permitir requests sin origin (como Postman, mobile apps, etc.)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    // Verificar si el origin está en la lista de permitidos
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      // En desarrollo, permitir cualquier origin (solo para debugging)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(colors.yellow(`⚠ CORS: Origin no permitido pero aceptado en desarrollo: ${origin}`));
+        callback(null, true);
+      } else {
+        // En producción, log del error pero rechazar
+        console.error(colors.red(`✗ CORS: Origin rechazado: ${origin}`));
+        console.error(colors.red(`✗ CORS: Orígenes permitidos: ${allowedOrigins.join(', ')}`));
+        callback(new Error(`No permitido por CORS. Origin: ${origin}`));
+      }
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 app.use(cors(corsOptions));
 
