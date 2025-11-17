@@ -54,6 +54,7 @@ export const validateRegistrarSesion = (req, res, next) => {
     }
   }
 
+
   // Validar fecha si se proporciona
   if (req.body.fecha) {
     const fecha = new Date(req.body.fecha);

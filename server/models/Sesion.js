@@ -50,8 +50,15 @@ const sesionSchema = new mongoose.Schema(
       min: 1,
     },
     
-    // Tratamiento realizado
-    tratamiento: {
+    // Información de la sesión en el tratamiento
+    numeroSesion: {
+      type: Number,
+      min: 1,
+      default: null,
+    }, // Número de sesión actual del paciente (ej: 3 de 10) - se calcula automáticamente
+    
+    // Detalles del tratamiento realizado
+    detallesTratamiento: {
       descripcion: { type: String, trim: true },
       tecnicas: [{ type: String, trim: true }],
       areas: [{ type: String, trim: true }], // Zonas tratadas
@@ -124,6 +131,15 @@ const sesionSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: [500, 'El motivo no puede exceder 500 caracteres'],
+    },
+    
+    // Sesión reprogramada (si se cancela y se posterga)
+    sesionReprogramada: {
+      fecha: { type: Date },
+      sesionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Sesion',
+      }, // ID de la nueva sesión creada al reprogramar
     },
     
     // Observaciones generales de la sesión
@@ -233,6 +249,7 @@ sesionSchema.methods.obtenerDatosPlanilla = function() {
     estado: this.estado,
     observaciones: this.observaciones,
     fecha: this.fecha,
+    numeroSesion: this.numeroSesion,
   };
 };
 
@@ -256,12 +273,11 @@ sesionSchema.post('save', async function(doc) {
     const Paciente = mongoose.model('Paciente');
     const Sesion = mongoose.model('Sesion');
     
-    // Calcular estadísticas
+    // Calcular estadísticas de TODAS las sesiones (no solo realizadas)
     const stats = await Sesion.aggregate([
       { 
         $match: { 
-          paciente: doc.paciente,
-          estado: 'realizada'
+          paciente: doc.paciente
         } 
       },
       {
@@ -283,16 +299,22 @@ sesionSchema.post('save', async function(doc) {
       }
     ]);
     
-    if (stats.length > 0) {
-      await Paciente.findByIdAndUpdate(doc.paciente, {
-        estadisticas: {
-          totalSesiones: stats[0].totalSesiones,
-          totalAbonado: stats[0].totalAbonado,
-          saldoPendiente: stats[0].saldoPendiente,
-          ultimaSesion: stats[0].ultimaSesion,
-        }
-      });
-    }
+    // Actualizar estadísticas siempre, incluso si no hay sesiones (para resetear a 0)
+    const estadisticas = stats.length > 0 ? {
+      totalSesiones: stats[0].totalSesiones,
+      totalAbonado: stats[0].totalAbonado,
+      saldoPendiente: stats[0].saldoPendiente,
+      ultimaSesion: stats[0].ultimaSesion,
+    } : {
+      totalSesiones: 0,
+      totalAbonado: 0,
+      saldoPendiente: 0,
+      ultimaSesion: null,
+    };
+    
+    await Paciente.findByIdAndUpdate(doc.paciente, {
+      estadisticas: estadisticas
+    });
   } catch (error) {
     console.error('Error actualizando estadísticas del paciente:', error);
   }

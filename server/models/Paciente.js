@@ -142,6 +142,28 @@ const pacienteSchema = new mongoose.Schema(
       default: 'activo',
     },
     
+    // Información de Tratamiento
+    tratamiento: {
+      cantidadTotalSesiones: {
+        type: Number,
+        min: 1,
+        default: null,
+      }, // Total de sesiones que debe realizar el paciente (ej: 10, 15, 20)
+      fechaInicio: {
+        type: Date,
+        default: null,
+      },
+      fechaFinEstimada: {
+        type: Date,
+        default: null,
+      },
+      observaciones: {
+        type: String,
+        trim: true,
+        maxlength: [500, 'Las observaciones no pueden exceder 500 caracteres'],
+      },
+    },
+    
     // Información de Pagos
     modalidadPago: {
       type: String,

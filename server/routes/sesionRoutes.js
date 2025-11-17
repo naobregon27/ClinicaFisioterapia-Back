@@ -9,6 +9,7 @@ import {
   cancelarSesion,
   obtenerEstadisticas,
   obtenerPagosPendientes,
+  actualizarDesdePlanilla,
 } from '../controllers/sesionController.js';
 import { protect, authorize } from '../middlewares/authMiddleware.js';
 import {
@@ -65,6 +66,13 @@ router.put(
   authorize(ROLES.ADMIN, ROLES.EMPLEADO, ROLES.USUARIO),
   validateRegistrarPago,
   registrarPago
+);
+
+// Actualizar desde planilla diaria
+router.put(
+  '/:id/planilla',
+  authorize(ROLES.ADMIN, ROLES.EMPLEADO, ROLES.USUARIO),
+  actualizarDesdePlanilla
 );
 
 // Cancelar sesión

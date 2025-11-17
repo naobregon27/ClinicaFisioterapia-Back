@@ -56,7 +56,8 @@ export const obtenerSesiones = asyncHandler(async (req, res) => {
  */
 export const obtenerPlanillaDiaria = asyncHandler(async (req, res) => {
   const { fecha } = req.query;
-  const fechaPlanilla = fecha ? new Date(fecha) : new Date();
+  // Pasar el string directamente si es formato YYYY-MM-DD, o crear Date si no hay fecha
+  const fechaPlanilla = fecha || new Date();
 
   const resultado = await SesionService.obtenerPlanillaDiaria(fechaPlanilla);
 
@@ -131,12 +132,12 @@ export const registrarPago = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Cancelar una sesión
+ * @desc    Cancelar una sesión (con opción de reprogramar)
  * @route   PUT /api/sesiones/:id/cancelar
  * @access  Private (empleado/admin)
  */
 export const cancelarSesion = asyncHandler(async (req, res) => {
-  const { motivo } = req.body;
+  const { motivo, nuevaFecha } = req.body;
 
   if (!motivo) {
     return ApiResponse.error(
@@ -146,7 +147,12 @@ export const cancelarSesion = asyncHandler(async (req, res) => {
     );
   }
 
-  const resultado = await SesionService.cancelarSesion(req.params.id, motivo);
+  const resultado = await SesionService.cancelarSesion(
+    req.params.id, 
+    motivo, 
+    nuevaFecha ? new Date(nuevaFecha) : null,
+    req.user._id
+  );
 
   return ApiResponse.success(
     res,
@@ -200,6 +206,26 @@ export const obtenerPagosPendientes = asyncHandler(async (req, res) => {
     res,
     HTTP_STATUS.OK,
     'Pagos pendientes obtenidos exitosamente',
+    resultado.data
+  );
+});
+
+/**
+ * @desc    Actualizar sesión desde planilla diaria (pago y observaciones)
+ * @route   PUT /api/sesiones/:id/planilla
+ * @access  Private (empleado/admin)
+ */
+export const actualizarDesdePlanilla = asyncHandler(async (req, res) => {
+  const resultado = await SesionService.actualizarDesdePlanilla(
+    req.params.id,
+    req.body,
+    req.user._id
+  );
+
+  return ApiResponse.success(
+    res,
+    HTTP_STATUS.OK,
+    resultado.message,
     resultado.data
   );
 });
