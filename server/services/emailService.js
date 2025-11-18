@@ -255,7 +255,7 @@ class EmailService {
    * @returns {Promise<Object>}
    */
   static async enviarEmailBienvenida(email, nombre) {
-    const loginUrl = `${process.env.CLIENT_URL}/login`;
+    const loginUrl = 'https://fisioterapiamiguel.netlify.app/login';
 
     const html = `
       <!DOCTYPE html>
