@@ -70,6 +70,8 @@ export const validateRegister = (req, res, next) => {
   }
 
   if (errors.length > 0) {
+    console.log('❌ Errores de validación en registro:', JSON.stringify(errors, null, 2));
+    console.log('📝 Datos recibidos:', JSON.stringify({ nombre, apellido, email, password: password ? '***' : undefined, telefono, rol }, null, 2));
     return ApiResponse.validationError(res, errors);
   }
 
