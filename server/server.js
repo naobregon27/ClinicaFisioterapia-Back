@@ -27,6 +27,10 @@ connectDB();
 // Inicializar Express
 const app = express();
 
+// Trust Proxy - Necesario cuando la app está detrás de un proxy (Render, Heroku, etc.)
+// Permite que Express confíe en los headers X-Forwarded-* para identificar IPs correctamente
+app.set('trust proxy', true);
+
 // ============================================
 // MIDDLEWARES DE SEGURIDAD
 // ============================================
@@ -52,6 +56,12 @@ const allowedOrigins = [];
 if (process.env.CLIENT_URL) {
   allowedOrigins.push(process.env.CLIENT_URL);
   console.log(colors.cyan(`✓ CORS: URL de producción agregada: ${process.env.CLIENT_URL}`));
+}
+
+// Agregar URL de Netlify por defecto
+if (!allowedOrigins.includes('https://fisioterapiamiguel.netlify.app')) {
+  allowedOrigins.push('https://fisioterapiamiguel.netlify.app');
+  console.log(colors.cyan(`✓ CORS: URL de Netlify agregada: https://fisioterapiamiguel.netlify.app`));
 }
 
 // Agregar URLs de desarrollo comunes (siempre permitidas, incluso en producción)
