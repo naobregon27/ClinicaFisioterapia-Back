@@ -173,6 +173,32 @@ class SesionService {
   }
 
   /**
+   * Obtener detalles de una sesión por ID
+   * @param {String} sesionId - ID de la sesión
+   * @returns {Promise<Object>}
+   */
+  static async obtenerSesionPorId(sesionId) {
+    try {
+      const sesion = await Sesion.findById(sesionId)
+        .populate('paciente', 'nombre apellido dni telefono email obraSocial')
+        .populate('profesional', 'nombre apellido email')
+        .populate('modificadoPor', 'nombre apellido')
+        .lean();
+
+      if (!sesion) {
+        throw new ErrorResponse('Sesión no encontrada', HTTP_STATUS.NOT_FOUND);
+      }
+
+      return {
+        success: true,
+        data: { sesion },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * Obtener planilla diaria de movimientos
    * @param {Date|String} fecha - Fecha de la planilla
    * @returns {Promise<Object>}

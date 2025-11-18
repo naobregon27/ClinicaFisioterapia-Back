@@ -50,6 +50,22 @@ export const obtenerSesiones = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Obtener detalles de una sesión por ID
+ * @route   GET /api/sesiones/:id
+ * @access  Private (empleado/admin)
+ */
+export const obtenerSesionPorId = asyncHandler(async (req, res) => {
+  const resultado = await SesionService.obtenerSesionPorId(req.params.id);
+
+  return ApiResponse.success(
+    res,
+    HTTP_STATUS.OK,
+    'Sesión obtenida exitosamente',
+    resultado.data
+  );
+});
+
+/**
  * @desc    Obtener planilla diaria de movimientos
  * @route   GET /api/sesiones/planilla-diaria
  * @access  Private (empleado/admin)

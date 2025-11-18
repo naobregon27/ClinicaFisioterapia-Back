@@ -4,6 +4,7 @@ import {
   obtenerSesiones,
   obtenerPlanillaDiaria,
   obtenerHistorialPaciente,
+  obtenerSesionPorId,
   actualizarSesion,
   registrarPago,
   cancelarSesion,
@@ -58,6 +59,7 @@ router
 // Rutas específicas de una sesión
 router
   .route('/:id')
+  .get(authorize(ROLES.ADMIN, ROLES.EMPLEADO, ROLES.USUARIO), obtenerSesionPorId)
   .put(authorize(ROLES.ADMIN, ROLES.EMPLEADO, ROLES.USUARIO), validateActualizarSesion, actualizarSesion);
 
 // Registrar pago
