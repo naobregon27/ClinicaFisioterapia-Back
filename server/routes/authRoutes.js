@@ -30,6 +30,7 @@ const registerLimiter = rateLimit({
   message: 'Demasiados intentos de registro. Por favor intenta nuevamente en una hora.',
   standardHeaders: true,
   legacyHeaders: false,
+  validate: false, // Deshabilita validaciones estrictas (necesario cuando trust proxy está activo)
 });
 
 const loginLimiter = rateLimit({
@@ -38,6 +39,7 @@ const loginLimiter = rateLimit({
   message: 'Demasiados intentos de inicio de sesión. Por favor intenta nuevamente más tarde.',
   standardHeaders: true,
   legacyHeaders: false,
+  validate: false, // Deshabilita validaciones estrictas (necesario cuando trust proxy está activo)
 });
 
 const emailLimiter = rateLimit({
@@ -46,6 +48,7 @@ const emailLimiter = rateLimit({
   message: 'Demasiados intentos de envío de email. Por favor intenta nuevamente en una hora.',
   standardHeaders: true,
   legacyHeaders: false,
+  validate: false, // Deshabilita validaciones estrictas (necesario cuando trust proxy está activo)
 });
 
 // Rutas públicas

@@ -123,9 +123,7 @@ const limiter = rateLimit({
   message: 'Demasiadas peticiones desde esta IP, por favor intenta nuevamente más tarde.',
   standardHeaders: true, // Retorna rate limit info en los headers `RateLimit-*`
   legacyHeaders: false, // Deshabilita los headers `X-RateLimit-*`
-  validate: {
-    trustProxy: false, // Deshabilita validación estricta de trust proxy (necesario cuando confiamos en Render como proxy)
-  },
+  validate: false, // Deshabilita validaciones estrictas (necesario cuando trust proxy está activo en Render)
 });
 app.use('/api/', limiter);
 
