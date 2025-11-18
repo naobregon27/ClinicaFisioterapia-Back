@@ -5,7 +5,7 @@ import {
   buscarPacientes,
   obtenerPacientePorId,
   actualizarPaciente,
-  eliminarPaciente,
+  actualizarEstadoPaciente,
   darAltaMedica,
   obtenerEstadisticas,
 } from '../controllers/pacienteController.js';
@@ -45,8 +45,13 @@ router
 router
   .route('/:id')
   .get(authorize(ROLES.ADMIN, ROLES.EMPLEADO, ROLES.USUARIO), obtenerPacientePorId)
-  .put(authorize(ROLES.ADMIN, ROLES.EMPLEADO, ROLES.USUARIO), validateActualizarPaciente, actualizarPaciente)
-  .delete(authorize(ROLES.ADMIN, ROLES.EMPLEADO, ROLES.USUARIO), eliminarPaciente);
+  .put(authorize(ROLES.ADMIN, ROLES.EMPLEADO, ROLES.USUARIO), validateActualizarPaciente, actualizarPaciente);
+
+router.put(
+  '/:id/estado',
+  authorize(ROLES.ADMIN, ROLES.EMPLEADO, ROLES.USUARIO),
+  actualizarEstadoPaciente
+);
 
 // Alta médica
 router.put(

@@ -111,17 +111,24 @@ export const actualizarPaciente = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Eliminar un paciente (soft delete)
- * @route   DELETE /api/pacientes/:id
- * @access  Private (admin)
+ * @desc    Actualizar el estado de un paciente (activar/desactivar)
+ * @route   PUT /api/pacientes/:id/estado
+ * @access  Private (empleado/admin)
  */
-export const eliminarPaciente = asyncHandler(async (req, res) => {
-  const resultado = await PacienteService.eliminarPaciente(req.params.id);
+export const actualizarEstadoPaciente = asyncHandler(async (req, res) => {
+  const { estado, motivo } = req.body;
+
+  const resultado = await PacienteService.actualizarEstadoPaciente(
+    req.params.id,
+    estado,
+    motivo
+  );
 
   return ApiResponse.success(
     res,
     HTTP_STATUS.OK,
-    resultado.message
+    resultado.message,
+    resultado.data
   );
 });
 

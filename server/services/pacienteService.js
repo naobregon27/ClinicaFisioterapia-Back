@@ -99,13 +99,75 @@ aciente - Datos del paciente
         Paciente.countDocuments(query),
       ]);
 
+      // Obtener resumen de sesiones y pagos por paciente
+      const pacienteIds = pacientes.map((paciente) => paciente._id);
+      let sesionesPorPaciente = {};
+
+      if (pacienteIds.length > 0) {
+        const resumenSesiones = await Sesion.aggregate([
+          { $match: { paciente: { $in: pacienteIds } } },
+          {
+            $group: {
+              _id: '$paciente',
+              sesionesTotales: { $sum: 1 },
+              sesionesRealizadas: {
+                $sum: { $cond: [{ $eq: ['$estado', 'realizada'] }, 1, 0] },
+              },
+              sesionesPagadas: {
+                $sum: { $cond: [{ $eq: ['$pago.pagado', true] }, 1, 0] },
+              },
+              sesionesPendientesPago: {
+                $sum: { $cond: [{ $eq: ['$pago.pagado', false] }, 1, 0] },
+              },
+              montoPagado: {
+                $sum: { $cond: [{ $eq: ['$pago.pagado', true] }, '$pago.monto', 0] },
+              },
+              montoAdeudado: {
+                $sum: { $cond: [{ $eq: ['$pago.pagado', false] }, '$pago.monto', 0] },
+              },
+            },
+          },
+        ]);
+
+        sesionesPorPaciente = resumenSesiones.reduce((acc, item) => {
+          acc[item._id.toString()] = {
+            sesionesTotales: item.sesionesTotales,
+            sesionesRealizadas: item.sesionesRealizadas,
+            sesionesPagadas: item.sesionesPagadas,
+            sesionesPendientesPago: item.sesionesPendientesPago,
+            montoPagado: item.montoPagado,
+            montoAdeudado: item.montoAdeudado,
+            tienePagosPendientes: item.sesionesPendientesPago > 0 || item.montoAdeudado > 0,
+          };
+          return acc;
+        }, {});
+      }
+
+      const pacientesConResumen = pacientes.map((paciente) => {
+        const resumen =
+          sesionesPorPaciente[paciente._id.toString()] || {
+            sesionesTotales: 0,
+            sesionesRealizadas: 0,
+            sesionesPagadas: 0,
+            sesionesPendientesPago: 0,
+            montoPagado: 0,
+            montoAdeudado: 0,
+            tienePagosPendientes: false,
+          };
+
+        return {
+          ...paciente,
+          resumenSesiones: resumen,
+        };
+      });
+
       // Calcular total de páginas
       const totalPages = Math.ceil(total / limit);
 
       return {
         success: true,
         data: {
-          pacientes,
+          pacientes: pacientesConResumen,
           pagination: {
             page: Number(page),
             limit: Number(limit),
@@ -201,25 +263,60 @@ aciente - Datos del paciente
   }
 
   /**
-   * Eliminar un paciente (soft delete)
+   * Actualizar el estado de un paciente (activar/desactivar)
    * @param {String} pacienteId - ID del paciente
+   * @param {String} nuevoEstado - Estado destino (activo/inactivo)
+   * @param {String} motivo - Motivo opcional del cambio
    * @returns {Promise<Object>}
    */
-  static async eliminarPaciente(pacienteId) {
+  static async actualizarEstadoPaciente(pacienteId, nuevoEstado, motivo = '') {
     try {
+      const estadosPermitidos = ['activo', 'inactivo'];
+
+      if (!nuevoEstado || !estadosPermitidos.includes(nuevoEstado)) {
+        throw new ErrorResponse(
+          'Debe proporcionar un estado válido (activo o inactivo)',
+          HTTP_STATUS.BAD_REQUEST
+        );
+      }
+
       const paciente = await Paciente.findById(pacienteId);
 
       if (!paciente) {
         throw new ErrorResponse('Paciente no encontrado', HTTP_STATUS.NOT_FOUND);
       }
 
-      // Soft delete: cambiar estado a inactivo
-      paciente.estado = 'inactivo';
+      if (paciente.estado === nuevoEstado) {
+        const mensaje =
+          nuevoEstado === 'activo'
+            ? 'El paciente ya se encuentra activo'
+            : 'El paciente ya se encuentra inactivo';
+
+        return {
+          success: true,
+          message: mensaje,
+          data: { paciente: paciente.obtenerDatosPublicos() },
+        };
+      }
+
+      paciente.estado = nuevoEstado;
+
+      if (motivo) {
+        const separador = paciente.observaciones ? '\n\n' : '';
+        paciente.observaciones = `${
+          paciente.observaciones || ''
+        }${separador}CAMBIO DE ESTADO (${new Date().toLocaleDateString()}): ${motivo}`;
+      }
+
       await paciente.save();
 
       return {
         success: true,
-        message: 'Paciente desactivado exitosamente',
+        message:
+          nuevoEstado === 'activo'
+            ? 'Paciente activado exitosamente'
+            : 'Paciente desactivado exitosamente',
+        data: { paciente: paciente.obtenerDatosPublicos() },
       };
     } catch (error) {
       throw error;

@@ -62,6 +62,11 @@ const userSchema = new mongoose.Schema(
       },
       default: USER_STATUS.PENDING_VERIFICATION,
     },
+    estadoCuenta: {
+      type: String,
+      enum: ['activo', 'inactivo'],
+      default: 'activo',
+    },
     emailVerificado: {
       type: Boolean,
       default: false,
@@ -215,6 +220,7 @@ userSchema.methods.obtenerDatosPublicos = function () {
     direccion: this.direccion,
     rol: this.rol,
     estado: this.estado,
+    estadoCuenta: this.estadoCuenta,
     emailVerificado: this.emailVerificado,
     ultimoAcceso: this.ultimoAcceso,
     avatar: this.avatar,
