@@ -130,16 +130,16 @@ app.use('/api/', limiter);
 // XSS Clean - Prevenir ataques XSS
 app.use(xss());
 
-// HPP - Prevenir HTTP Parameter Pollution
-app.use(hpp());
-
 // ============================================
 // MIDDLEWARES DE PARSEO
 // ============================================
 
-// Body parser
+// Body parser - DEBE ir antes de HPP
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// HPP - Prevenir HTTP Parameter Pollution (debe ir DESPUÉS del body parser)
+app.use(hpp());
 
 // Cookie parser
 app.use(cookieParser());

@@ -2,6 +2,7 @@ import express from 'express';
 import authRoutes from './authRoutes.js';
 import pacienteRoutes from './pacienteRoutes.js';
 import sesionRoutes from './sesionRoutes.js';
+import adminRoutes from './adminRoutes.js';
 
 const router = express.Router();
 
@@ -27,6 +28,9 @@ router.use('/pacientes', pacienteRoutes);
 
 // Rutas de gestión de sesiones (protegidas)
 router.use('/sesiones', sesionRoutes);
+
+// Rutas de administración (solo administradores)
+router.use('/admin', adminRoutes);
 
 // Aquí se pueden agregar más rutas en el futuro
 // router.use('/reportes', reportesRoutes);

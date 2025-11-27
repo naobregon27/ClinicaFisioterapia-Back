@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import { HTTP_STATUS } from '../conf/constants.js';
+import { registrarAccionManual } from '../middlewares/auditMiddleware.js';
 
 /**
  * @desc    Registrar nuevo usuario
@@ -68,6 +69,19 @@ export const login = asyncHandler(async (req, res) => {
 
   const resultado = await AuthService.iniciarSesion(email, password, ipAddress);
 
+  // Registrar acción de auditoría
+  if (resultado.data?.usuario) {
+    req.user = resultado.data.usuario; // Temporalmente para auditoría
+    await registrarAccionManual(
+      req,
+      'iniciar_sesion',
+      `Inicio de sesión del usuario ${email}`,
+      { tipo: 'usuario', id: resultado.data.usuario.id, nombre: email },
+      null,
+      { email, ipAddress }
+    );
+  }
+
   // Configurar cookie con el access token
   const cookieOptions = {
     expires: new Date(
@@ -95,6 +109,14 @@ export const login = asyncHandler(async (req, res) => {
  */
 export const logout = asyncHandler(async (req, res) => {
   const resultado = await AuthService.cerrarSesion(req.user._id);
+
+  // Registrar acción de auditoría
+  await registrarAccionManual(
+    req,
+    'cerrar_sesion',
+    `Cierre de sesión del usuario ${req.user.email}`,
+    { tipo: 'usuario', id: req.user._id, nombre: req.user.email }
+  );
 
   // Limpiar cookie
   res.cookie('token', 'none', {
