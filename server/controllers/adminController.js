@@ -419,20 +419,7 @@ export const crearMultiplesPagos = asyncHandler(async (req, res) => {
  * @access  Private (Solo Administrador)
  */
 export const obtenerPlanillaMes = asyncHandler(async (req, res) => {
-  const { año, mes } = req.query;
-
-  if (!año || !mes) {
-    return ApiResponse.error(
-      res,
-      HTTP_STATUS.BAD_REQUEST,
-      'Debe proporcionar año y mes'
-    );
-  }
-
-  const resultado = await PagoPersonalService.obtenerPlanillaMes(
-    parseInt(año),
-    parseInt(mes)
-  );
+  const resultado = await PagoPersonalService.obtenerPlanillaCompleta();
 
   return ApiResponse.success(
     res,

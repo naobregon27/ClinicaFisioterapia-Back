@@ -80,6 +80,48 @@ class PagoPersonalService {
   }
 
   /**
+   * Obtener toda la planilla (todos los meses disponibles)
+   */
+  static async obtenerPlanillaCompleta() {
+    const periodos = await PagoPersonal.aggregate([
+      {
+        $group: {
+          _id: { año: '$año', mes: '$mes' },
+        },
+      },
+      {
+        $sort: {
+          '_id.año': 1,
+          '_id.mes': 1,
+        },
+      },
+    ]);
+
+    if (!periodos.length) {
+      return {
+        success: true,
+        data: {
+          planillas: [],
+        },
+      };
+    }
+
+    const planillas = await Promise.all(
+      periodos.map(async (periodo) => {
+        const { año, mes } = periodo._id;
+        return PagoPersonal.obtenerPlanillaMes(año, mes);
+      })
+    );
+
+    return {
+      success: true,
+      data: {
+        planillas,
+      },
+    };
+  }
+
+  /**
    * Obtener registros con paginación y filtros
    */
   static async obtenerRegistros(filtros = {}, opciones = {}) {
