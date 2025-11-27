@@ -155,6 +155,18 @@ pagoPersonalSchema.statics.obtenerPlanillaMes = async function(año, mes) {
       };
     }
     
+    const colaborador = registro.creadoPor
+      ? {
+          id: registro.creadoPor._id || registro.creadoPor.id,
+          nombre: registro.creadoPor.nombre,
+          apellido: registro.creadoPor.apellido,
+          nombreCompleto: [registro.creadoPor.nombre, registro.creadoPor.apellido]
+            .filter(Boolean)
+            .join(' ')
+            .trim(),
+        }
+      : null;
+
     const diaNombre = registro.diaSemana;
     planillaPorSemanas[registro.semana].dias[diaNombre] = {
       fecha: registro.fecha,
@@ -162,6 +174,7 @@ pagoPersonalSchema.statics.obtenerPlanillaMes = async function(año, mes) {
       distribucion: registro.distribucion,
       observaciones: registro.observaciones,
       estado: registro.estado,
+      colaborador,
     };
     
     planillaPorSemanas[registro.semana].subtotal += registro.monto;
