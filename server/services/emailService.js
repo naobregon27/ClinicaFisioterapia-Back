@@ -512,6 +512,302 @@ class EmailService {
       text,
     });
   }
+
+  /**
+   * Envía email de recordatorio de sesión (24 horas antes)
+   */
+  static async enviarRecordatorioSesion({ to, pacienteNombre, fecha, horaEntrada, profesionalNombre }) {
+    const fechaFormateada = new Date(fecha).toLocaleDateString('es-AR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+          }
+          .header {
+            background-color: #3498db;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+          }
+          .content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+          }
+          .info-box {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-left: 4px solid #3498db;
+            margin: 20px 0;
+            border-radius: 4px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Recordatorio de Sesión</h1>
+          </div>
+          <div class="content">
+            <h2>Hola ${pacienteNombre},</h2>
+            <p>Te recordamos que tienes una sesión programada:</p>
+            <div class="info-box">
+              <p><strong>Fecha:</strong> ${fechaFormateada}</p>
+              <p><strong>Hora:</strong> ${horaEntrada || 'Por confirmar'}</p>
+              <p><strong>Profesional:</strong> ${profesionalNombre}</p>
+            </div>
+            <p>Por favor, confirma tu asistencia o contáctanos si necesitas reprogramar.</p>
+            <p>¡Te esperamos!</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const text = `
+      Hola ${pacienteNombre},
+      
+      Te recordamos que tienes una sesión programada:
+      
+      Fecha: ${fechaFormateada}
+      Hora: ${horaEntrada || 'Por confirmar'}
+      Profesional: ${profesionalNombre}
+      
+      Por favor, confirma tu asistencia o contáctanos si necesitas reprogramar.
+      
+      ¡Te esperamos!
+      
+      Clínica Fisioterapia
+    `;
+
+    return await this.enviarEmail({
+      to,
+      subject: 'Recordatorio: Tienes una sesión mañana - Clínica Fisioterapia',
+      html,
+      text,
+    });
+  }
+
+  /**
+   * Envía email de recordatorio de sesión del día
+   */
+  static async enviarRecordatorioSesionHoy({ to, pacienteNombre, fecha, horaEntrada, profesionalNombre }) {
+    const fechaFormateada = new Date(fecha).toLocaleDateString('es-AR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+          }
+          .header {
+            background-color: #27ae60;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+          }
+          .content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+          }
+          .info-box {
+            background-color: #d4edda;
+            padding: 20px;
+            border-left: 4px solid #27ae60;
+            margin: 20px 0;
+            border-radius: 4px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Recordatorio: Sesión Hoy</h1>
+          </div>
+          <div class="content">
+            <h2>Hola ${pacienteNombre},</h2>
+            <p>Te recordamos que tienes una sesión programada para hoy:</p>
+            <div class="info-box">
+              <p><strong>Fecha:</strong> ${fechaFormateada}</p>
+              <p><strong>Hora:</strong> ${horaEntrada || 'Por confirmar'}</p>
+              <p><strong>Profesional:</strong> ${profesionalNombre}</p>
+            </div>
+            <p>¡Te esperamos!</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const text = `
+      Hola ${pacienteNombre},
+      
+      Te recordamos que tienes una sesión programada para hoy:
+      
+      Fecha: ${fechaFormateada}
+      Hora: ${horaEntrada || 'Por confirmar'}
+      Profesional: ${profesionalNombre}
+      
+      ¡Te esperamos!
+      
+      Clínica Fisioterapia
+    `;
+
+    return await this.enviarEmail({
+      to,
+      subject: 'Recordatorio: Tienes una sesión hoy - Clínica Fisioterapia',
+      html,
+      text,
+    });
+  }
+
+  /**
+   * Envía email de resumen diario a administradores
+   */
+  static async enviarResumenDiario({ to, nombre, resumen }) {
+    const html = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+          }
+          .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+          }
+          .content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+          }
+          .metric-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+          }
+          .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Resumen Diario - ${resumen.fecha}</h1>
+          </div>
+          <div class="content">
+            <h2>Hola ${nombre},</h2>
+            <p>Aquí está el resumen de las actividades del día:</p>
+            
+            <div class="metric-box">
+              <div class="metric-value">${resumen.sesionesRealizadas}</div>
+              <p>Sesiones Realizadas</p>
+            </div>
+            
+            <div class="metric-box">
+              <div class="metric-value">${resumen.sesionesProgramadas}</div>
+              <p>Sesiones Programadas</p>
+            </div>
+            
+            <div class="metric-box">
+              <div class="metric-value">$${resumen.ingresosDia.toFixed(2)}</div>
+              <p>Ingresos del Día</p>
+            </div>
+            
+            <div class="metric-box">
+              <div class="metric-value">${resumen.pacientesNuevos}</div>
+              <p>Pacientes Nuevos</p>
+            </div>
+            
+            <div class="metric-box">
+              <div class="metric-value">${resumen.pagosPendientes}</div>
+              <p>Pagos Pendientes</p>
+            </div>
+            
+            <p>¡Que tengas un excelente día!</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const text = `
+      Resumen Diario - ${resumen.fecha}
+      
+      Hola ${nombre},
+      
+      Resumen de actividades del día:
+      
+      Sesiones Realizadas: ${resumen.sesionesRealizadas}
+      Sesiones Programadas: ${resumen.sesionesProgramadas}
+      Ingresos del Día: $${resumen.ingresosDia.toFixed(2)}
+      Pacientes Nuevos: ${resumen.pacientesNuevos}
+      Pagos Pendientes: ${resumen.pagosPendientes}
+      
+      ¡Que tengas un excelente día!
+      
+      Clínica Fisioterapia
+    `;
+
+    return await this.enviarEmail({
+      to,
+      subject: `Resumen Diario - ${resumen.fecha} - Clínica Fisioterapia`,
+      html,
+      text,
+    });
+  }
 }
 
 export default EmailService;

@@ -18,6 +18,9 @@ import routes from './routes/index.js';
 // Importar middlewares
 import errorHandler, { notFoundHandler } from './middlewares/errorHandler.js';
 
+// Importar tareas programadas (cron jobs)
+import './utils/cronJobs.js';
+
 // Cargar variables de entorno
 dotenv.config();
 

@@ -30,6 +30,7 @@ import {
 import { protect, authorize } from '../middlewares/authMiddleware.js';
 import { ROLES } from '../conf/constants.js';
 
+
 const router = express.Router();
 
 // Todas las rutas requieren autenticación Y ser administrador

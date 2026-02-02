@@ -3,6 +3,12 @@ import authRoutes from './authRoutes.js';
 import pacienteRoutes from './pacienteRoutes.js';
 import sesionRoutes from './sesionRoutes.js';
 import adminRoutes from './adminRoutes.js';
+import notificacionRoutes from './notificacionRoutes.js';
+import dashboardRoutes from './dashboardRoutes.js';
+import busquedaRoutes from './busquedaRoutes.js';
+import calendarioRoutes from './calendarioRoutes.js';
+import evolucionRoutes from './evolucionRoutes.js';
+import exportRoutes from './exportRoutes.js';
 
 const router = express.Router();
 
@@ -31,6 +37,24 @@ router.use('/sesiones', sesionRoutes);
 
 // Rutas de administración (solo administradores)
 router.use('/admin', adminRoutes);
+
+// Rutas de notificaciones (protegidas)
+router.use('/notificaciones', notificacionRoutes);
+
+// Rutas de dashboard (protegidas)
+router.use('/dashboard', dashboardRoutes);
+
+// Rutas de búsqueda global (protegidas)
+router.use('/buscar', busquedaRoutes);
+
+// Rutas de calendario (protegidas)
+router.use('/calendario', calendarioRoutes);
+
+// Rutas de evolución (protegidas)
+router.use('/evolucion', evolucionRoutes);
+
+// Rutas de exportación (protegidas)
+router.use('/exportar', exportRoutes);
 
 // Aquí se pueden agregar más rutas en el futuro
 // router.use('/reportes', reportesRoutes);
