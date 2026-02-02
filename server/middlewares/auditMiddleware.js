@@ -101,3 +101,9 @@ export const registrarAccionManual = async (req, accion, descripcion, recurso = 
 
 
 
+
+
+
+
+
+
